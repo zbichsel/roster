@@ -88,3 +88,46 @@ const viewEveryRole = () => {
     })
 };
 
+// to add a role
+const addRole = () => {
+    // display list of departments to add role to
+    const deptQuery = `SELECT * FROM department`;
+
+    db.query(deptQuery, (err, result) => {
+        if (err) throw err;
+        const departments = result.map(({ name, id }) => ({ name: name, value: id }));
+
+        inquirer.prompt(
+            [
+                {
+                    type: "input",
+                    name: "title",
+                    message: "What is the name of the role you would like to add?"
+                },
+                {
+                    type: "input",
+                    name: "salary",
+                    message: "What is the salary for this role?"
+                },
+                {
+                    type: "list",
+                    name: "department",
+                    message: "In which Department is this new role?",
+                    choices: departments
+                }
+            ]
+        )
+    })
+    .then(answer => {
+        const query = `INSERT INTO role(title, salary, department_id)
+        VALUES(?, ?, ?)`;
+
+        db.query(query, answer.title, answer.salary, answer.department, (err, result) => {
+            if (err) throw err;
+            console.log(`Department ${answer.name} successfully added with id ${result.insertId}.`);
+
+            questionPrompts();
+        });
+    })
+};
+
