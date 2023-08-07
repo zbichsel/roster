@@ -1,2 +1,2 @@
-node_modules
-DS_Store
+const allQs = require('./scripts/index');
+const inquirer = require('inquirer');
