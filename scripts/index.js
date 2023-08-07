@@ -231,3 +231,116 @@ const viewingByManager = () => {
         })
     })
 };
+
+// viewing employees by department
+const viewingEmpsByDept = () => {
+    const deptQuery = `SELECT * FROM department`;
+
+    db.query(deptQuery, (err, result) => {
+        if (err) throw err;
+        const departments = result.map(({ name, id }) => ({ name: name, value: id }));
+
+        inquirer.prompt(
+            [
+                {
+                    type: "list",
+                    name: "option",
+                    message: "Which department would you like to search by?",
+                    choices: departments
+                }
+            ]
+        )
+    })
+    .then(answer => {
+        console.log('Listing all employees under selected department...\n');
+        const query = `SELECT employee.id AS id, first_name, last_name, role.title AS title, department.name AS department
+        FROM employee
+        LEFT JOIN role ON employee.role_id = role.id
+        LEFT JOIN department ON role.department_id = department.id
+        WHERE department.id = ?`;
+
+        db.query(query, answer.option, (err, result) => {
+            if (err) throw err;
+            console.log(result);
+
+            questionPrompts();
+        })
+    })
+};
+
+// adding employee
+const addEmployee = () => {
+    inquirer.prompt(
+        [
+            {
+                type: "input",
+                name: "first_name",
+                message: "What is the first name of the employee?"
+            },
+            {
+                type: "input",
+                name: "last_name",
+                message: "What is the last name of the employee?"
+            },
+        ]
+    )
+    .then(answer => {
+        const params = [answer.first_name, answer.last_name];
+        const employeeQuery = `SELECT * FROM employee`;
+
+        db.query(employeeQuery, (err, result) => {
+            if (err) throw err;
+            
+            const managers = result.map(({ first_name, last_name, id }) => ({ name: first_name + " " + last_name, value: id}));
+
+            inquirer.prompt(
+                [
+                    {
+                        type: "list",
+                        name: "manager",
+                        message: "Who is the employee's manager?",
+                        choices: managers
+                    }
+                ]
+            )
+            .then(response => {
+                const manager = response.managers;
+                params.push(manager);
+
+                const roleQuery = `SELECT * FROM role`;
+
+                db.query(roleQuery, (err, result) => {
+                    if (err) throw err;
+
+                    const roles = result.map(({ title, id }) => ({ name: title, value: id }));
+
+                    inquirer.prompt(
+                        [
+                            {
+                                type: "list",
+                                name: "role",
+                                message: "What is the employee's role?",
+                                choices: roles
+                            }
+                        ]
+                    )
+                    .then(data => {
+                        const role = data.roles;
+                        params.push(role);
+
+                        const query = `INSERT INTO employee(first_name, last_name, role_id, manager_id)
+                        VALUES(?, ?, ?, ?)`;
+
+                        db.query(query, answer.first_name, answer.last_name, answer.role, answer.manager, (err, result) => {
+                            if (err) throw err;
+                            console.log(`Employee successfully added!`);
+
+                            questionPrompts();
+                        })
+                    })
+                })
+            })
+        })
+    })
+};
+
