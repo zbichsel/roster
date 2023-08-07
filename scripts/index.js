@@ -344,3 +344,69 @@ const addEmployee = () => {
     })
 };
 
+// updating employee role
+const updateRole = () => {
+    const employeeQuery = `SELECT * FROM employee`;
+
+    db.query(employeeQuery, (err, result) => {
+        if (err) throw err;
+
+        const employees = result.map(({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id }));
+
+        inquirer.prompt(
+            [
+                {
+                    type: "list",
+                    name: "selected",
+                    message: "Which employee would you like to update?",
+                    choices: employees
+                }
+            ]
+        )
+        .then(answer => {
+            const employee = answer.selected;
+            const params = [];
+            params.push(employee);
+
+            const roleQuery = `SELECT * FROM role`;
+
+            db.query(roleQuery, (err, result) => {
+                if (err) throw err;
+
+                const roles = result.map(({ id, title }) => ({ name: title, value: id }));
+
+                inquirer.prompt(
+                    [
+                        {
+                            type: "list",
+                            name: "role",
+                            message: "What is the employee's new role?",
+                            choices: roles
+                        }
+                    ]
+                )
+                .then(answer => {
+                    const role = answer.roles;
+                    params.push(role);
+
+                    let employee = params[0];
+                    params[0] = role;
+                    params[1] = employee;
+
+                    const query = `UPDATE employee
+                    SET role_id = ?
+                    WHERE id = ?`;
+
+                    db.query(query, params, (err, result) => {
+                        if (err) throw err;
+                        console.log('Employee successfully updated!');
+
+                        questionPrompts();
+                    })
+                })
+            })
+        })
+    })
+};
+
+module.exports = { viewEveryDepartment, addDepartment, deleteDepartment };
