@@ -45,6 +45,8 @@ There are currently no test for this application
 
   ## Video
 
+https://github.com/zbichsel/roster/assets/136612956/96c2c85f-daa1-4ac5-b07d-c5edc5863a9e
+
   ## Questions
 
   If you have any questions, feel free to reach me at [GitHub](https://github.com/zbichsel) or via email at [biksel09@gmail.com](biksel09@gmail.com).
