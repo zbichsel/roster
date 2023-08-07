@@ -380,18 +380,17 @@ const updateRole = () => {
                         {
                             type: "list",
                             name: "role",
-                            message: "What is the employee's new role?",
-                            choices: roles
+                            message: "What is the employee's new role?"
                         }
                     ]
                 )
                 .then(answer => {
-                    const role = answer.roles;
+                    const role = answer.role;
                     params.push(role);
 
-                    let employee = params[0];
-                    params[0] = role;
-                    params[1] = employee;
+                    let employee = params[0]
+                    params[0] = role
+                    params[1] = employee
 
                     const query = `UPDATE employee
                     SET role_id = ?
@@ -409,4 +408,4 @@ const updateRole = () => {
     })
 };
 
-module.exports = { viewEveryDepartment, addDepartment, deleteDepartment };
+module.exports = { viewEveryDepartment, addDepartment, deleteDepartment, updateRole };
