@@ -34,10 +34,10 @@ const addDepartment = () => {
 
         db.query(query, answer.name, (err, result) => {
             if (err) throw err;
-            console.log(`Department ${answer.name} successfully added with id ${result.id}.`);
+            console.log(`Department ${answer.name} successfully added with id ${result.insertId}.`);
 
             questionPrompts();
-        });
+        })
     })
 };
 
@@ -127,7 +127,107 @@ const addRole = () => {
             console.log(`Department ${answer.name} successfully added with id ${result.insertId}.`);
 
             questionPrompts();
-        });
+        })
     })
 };
 
+// to delete a role
+const deleteRole = () => {
+    const roleQuery = `SELECT * FROM role`;
+
+    db.query(roleQuery, (err, result) => {
+        if (err) throw err;
+        const roles = result.map(({ title, id }) => ({ name: title, value: id }));
+
+        inquirer.prompt(
+            [
+                {
+                    type: "list",
+                    name: "option",
+                    message: "Which role would you like to delete?",
+                    choices: roles
+                }
+            ]
+        )
+    })
+    .then(answer => {
+        const query = `DELETE FROM role
+        WHERE id = ?`;
+
+        db.query(query, answer.option, (err, result) => {
+            if (err) throw err;
+            console.log(`${result.affectedRow} successfully deleted!`);
+
+            questionPrompts();
+        })
+    })
+};
+
+// viewing all employees
+const viewingEmployees = () => {
+    console.log('Listing every employee...\n');
+    const query = `SELECT employee.id AS id, first_name, last_name, role.title AS title, department.name AS department, manager_id
+    FROM employee
+    LEFT JOIN role ON employee.role_id = role.id
+    LEFT JOIN department ON role.department_id = department.id`;
+
+    db.query(query, (err, result) => {
+        if (err) throw err;
+        console.table(result); //DOUBLE CHECK
+
+        questionPrompts();
+    })
+};
+
+// viewing all managers
+const viewingManagers = () => {
+    console.log('Listing every manager...\n');
+    const query = `SELECT employee.id AS id, first_name, last_name, role.title AS title, department.name AS department
+    FROM employee
+    LEFT JOIN role ON employee.role_id = role.id
+    LEFT JOIN department ON role.department_id = department.id
+    WHERE employee.manager_id IS NULL`;
+
+    db.query(query, (err, result) => {
+        if (err) throw err;
+        console.table(result) //DOUBLE CHECK
+
+        questionPrompts();
+    })
+};
+
+// viewing employees by manager
+const viewingByManager = () => {
+    const employeeQuery = `SELECT * FROM employee`;
+
+    db.query(employeeQuery, (err, result) => {
+        if (err) throw err;
+        const employees = result.map(({ first_name, last_name, id }) => ({ name: first_name + " " + last_name, value: id}));
+
+        inquirer.prompt(
+            [
+                {
+                    type: "list",
+                    name: "option",
+                    message: "Whose employees would you like to view?",
+                    choices: employees
+                }
+            ]
+        )
+    })
+    .then(answer => {
+        console.log('Listing all employees under selected manager...\n');
+        const query = `SELECT employee.id AS id, first_name, last_name, role.title AS title, salary, department.name AS name
+        FROM employee
+        LEFT JOIN role ON employee.role_id = role.id
+        LEFT JOIN department ON role.department_id = department.id
+        WHERE employee.manager_id = ?`;
+
+        db.query(query, answer.option, (err, result) => {
+            if (err) throw err;
+            console.log(result);
+
+            questionPrompts();
+        })
+    })
+};
