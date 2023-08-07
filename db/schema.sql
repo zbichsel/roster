@@ -5,7 +5,7 @@ USE roster_db;
 
 CREATE TABLE department (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30) NOT NULL,
+    name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE role (
@@ -26,11 +26,11 @@ CREATE TABLE employee (
     role_id INT,
     manager_id INT,
     FOREIGN KEY (role_id)
-    REFERENCES role(id)
-    ON DELETE RESTRICT
-    ON UPDATE CASCADE,
+        REFERENCES role(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
     FOREIGN KEY (manager_id)
-    REFERENCES manager(id)
-    ON DELETE SET NULL
-    ON UPDATE CASCADE
+        REFERENCES employee(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 );
